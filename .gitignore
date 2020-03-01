@@ -1,0 +1,7 @@
+build/
+install-mac.sh*
+install-ubuntu.sh*
+set_git.sh*
+cmakepatch.txt*
+data/
+src/Eigen-3.3/
