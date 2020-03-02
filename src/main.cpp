@@ -7,6 +7,7 @@
 #include "/usr/include/eigen3/Eigen/QR"
 #include "helpers.h"
 #include "json.hpp"
+#include "spline.h"
 
 // for convenience
 using nlohmann::json;
@@ -50,7 +51,10 @@ int main() {
     map_waypoints_dy.push_back(d_y);
   }
 
-  h.onMessage([&map_waypoints_x,&map_waypoints_y,&map_waypoints_s,
+  int lane = 1; // middle lane
+  double ref_vel = 49;  // miles per hr
+
+  h.onMessage([&ref_vel,&lane, &map_waypoints_x,&map_waypoints_y,&map_waypoints_s,
                &map_waypoints_dx,&map_waypoints_dy]
               (uWS::WebSocket<uWS::SERVER> ws, char *data, size_t length,
                uWS::OpCode opCode) {
@@ -90,14 +94,31 @@ int main() {
 
           json msgJson;
 
+          // the points we want to actually pass to planner
           vector<double> next_x_vals;
           vector<double> next_y_vals;
+
 
           /**
            * TODO: define a path made up of (x,y) points that the car will visit
            *   sequentially every .02 seconds
            */
+          double dist_inc = 0.5;
+          double next_s;
+          double next_d;
+          vector<double> xy;
+          for (int i = 0; i < 50; ++i)
+          {
+            next_s = car_s + (dist_inc * (i+1));  // present s pos plus where to be next
+            next_d = 6; // stay in the same lane
 
+            // cout << "inside for loop - " << i << endl;
+            // now convert these s and d back to map coordinates
+            xy = getXY(next_s, next_d, map_waypoints_s, map_waypoints_x, map_waypoints_y );
+
+            next_x_vals.push_back(xy[0]);
+            next_y_vals.push_back(xy[1]);
+          }
 
           msgJson["next_x"] = next_x_vals;
           msgJson["next_y"] = next_y_vals;
