@@ -52,10 +52,10 @@ int main() {
   }
 
   int lane = 1; // middle lane
-  double ref_vel = 49;  // miles per hr
+  double ref_vel = 49.5;  // miles per hr
 
-  h.onMessage([&ref_vel,&lane, &map_waypoints_x,&map_waypoints_y,&map_waypoints_s,
-               &map_waypoints_dx,&map_waypoints_dy]
+  h.onMessage([&map_waypoints_x,&map_waypoints_y,&map_waypoints_s,
+               &map_waypoints_dx,&map_waypoints_dy,&lane,&ref_vel]
               (uWS::WebSocket<uWS::SERVER> ws, char *data, size_t length,
                uWS::OpCode opCode) {
     // "42" at the start of the message means there's a websocket message event.
@@ -94,30 +94,119 @@ int main() {
 
           json msgJson;
 
+          // the points we are building with previous values too
+          vector<double> x_pts;
+          vector<double> y_pts;
+
+          int prev_size = previous_path_x.size();
+
+          // define some reference states
+          double ref_x = car_x;
+          double ref_y = car_y;
+          double ref_yaw = deg2rad(car_yaw);
+
+          // if the prev state is empty , use car as starting ref
+          if(prev_size < 2)
+          {
+            // curr is car_x. Get the prev state
+            double car_x_prev = car_x - cos(car_yaw);
+            double car_y_prev = car_y - sin(car_yaw);
+
+            x_pts.push_back(car_x_prev);
+            y_pts.push_back(car_y_prev);
+
+            x_pts.push_back(car_x);
+            y_pts.push_back(car_y);
+          }
+          else{
+            // you have more points from prev state
+            ref_x = previous_path_x[prev_size - 1];
+            ref_y = previous_path_y[prev_size - 1];
+
+            // get a previous point to this too to get the tangent angle
+            double ref_x_prev = previous_path_x[prev_size - 2];
+            double ref_y_prev = previous_path_y[prev_size - 2];
+            // calculate what angle the car was moving in
+            ref_yaw = atan2(ref_y - ref_y_prev, ref_x - ref_x_prev );
+
+            x_pts.push_back(ref_x_prev);
+            x_pts.push_back(ref_x);
+
+            y_pts.push_back(ref_y_prev);
+            y_pts.push_back(ref_y);
+          }
+
+          vector<double> next_wp0 = getXY(car_s + 30,(2+4*lane), map_waypoints_s, map_waypoints_x, map_waypoints_y);
+          vector<double> next_wp1 = getXY(car_s + 60,(2+4*lane), map_waypoints_s, map_waypoints_x, map_waypoints_y);
+          vector<double> next_wp2 = getXY(car_s + 90,(2+4*lane), map_waypoints_s, map_waypoints_x, map_waypoints_y);
+
+          x_pts.push_back(next_wp0[0]);
+          x_pts.push_back(next_wp1[0]);
+          x_pts.push_back(next_wp2[0]);
+
+          y_pts.push_back(next_wp0[1]);
+          y_pts.push_back(next_wp1[1]);
+          y_pts.push_back(next_wp2[1]);
+
+          // shift points to local co-ods for spline fit
+          for(int i=0; i< x_pts.size(); i++)
+          {
+            // shift car ref angle to 0
+            double shift_x = x_pts[i] - ref_x;
+            double shift_y = y_pts[i] - ref_y;
+
+            //rotate
+            x_pts[i] = shift_x * cos(0 - ref_yaw) - shift_y * sin(0 - ref_yaw);
+            y_pts[i] = shift_x * sin(0 - ref_yaw) + shift_y * cos(0 - ref_yaw);
+          }
+
+          // create a spline
+          tk::spline s;
+
+          s.set_points(x_pts, y_pts);
+
           // the points we want to actually pass to planner
           vector<double> next_x_vals;
           vector<double> next_y_vals;
 
-
-          /**
-           * TODO: define a path made up of (x,y) points that the car will visit
-           *   sequentially every .02 seconds
-           */
-          double dist_inc = 0.5;
-          double next_s;
-          double next_d;
-          vector<double> xy;
-          for (int i = 0; i < 50; ++i)
+          // start with all the points in the previous path
+          for(int i=0; i< previous_path_x.size(); i++)
           {
-            next_s = car_s + (dist_inc * (i+1));  // present s pos plus where to be next
-            next_d = 6; // stay in the same lane
+            next_x_vals.push_back(previous_path_x[i]);
+            next_y_vals.push_back(previous_path_y[i]);
+          }
 
-            // cout << "inside for loop - " << i << endl;
-            // now convert these s and d back to map coordinates
-            xy = getXY(next_s, next_d, map_waypoints_s, map_waypoints_x, map_waypoints_y );
+          // Now you need to get points for the car to follow b/w these points
+          double target_x = 30.0;
+          double target_y = s(target_x);
+          double target_dist = sqrt((target_x*target_x)+(target_y*target_y));
 
-            next_x_vals.push_back(xy[0]);
-            next_y_vals.push_back(xy[1]);
+          double x_addon = 0;
+
+          // fill up rest of the points upto 50
+          // check the README for description of code
+          for(int i = 1; i < 50-previous_path_x.size(); i++)
+          {
+            double N = (target_dist/ (0.02 * ref_vel / 2.24)); // miles - mps
+            double x_pt = x_addon + (target_x)/N;
+            double y_pt = s(x_pt);
+
+            x_addon = x_pt;
+
+            double x_ref = x_pt;
+            double y_ref = y_pt;
+
+            // rotate and translation back to normal (from local to global)
+            // rotation
+            x_pt = x_ref * cos(ref_yaw) - y_ref * sin(ref_yaw);
+            y_pt = x_ref * sin(ref_yaw) + y_ref * cos(ref_yaw);
+
+            // translation
+            x_pt += x_ref;
+            y_pt += y_ref;
+
+            next_x_vals.push_back(x_pt);
+            next_y_vals.push_back(y_pt);
           }
 
           msgJson["next_x"] = next_x_vals;
