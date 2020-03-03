@@ -202,8 +202,8 @@ int main() {
             y_pt = x_ref * sin(ref_yaw) + y_ref * cos(ref_yaw);
 
             // translation
-            x_pt += x_ref;
-            y_pt += y_ref;
+            x_pt += ref_x;
+            y_pt += ref_y;
 
             next_x_vals.push_back(x_pt);
             next_y_vals.push_back(y_pt);

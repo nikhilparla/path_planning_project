@@ -7,6 +7,14 @@ Self-Driving Car Engineer Nanodegree Program
  - Deleted the eigen folder from src
  - Compiles and runs successfully. Car doesnt move yet.
 
+ - Made the initial changes according to the project QandA
+ - Car moved in straight line with the generated coordinates
+
+ - Included the spline.h header only package. This can generate polynomial for line fit
+ - Created waypoints at 30,60 and 90 ahead and fit next 50 points
+ - Resued whatever points were left over from previous case
+ - Car now runs smoothly in the same lane. Jerk still present since 0-49.5 in one instant
+
 
 Everything below this line are the original instructions for the project. 
 -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
