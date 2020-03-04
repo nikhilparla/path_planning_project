@@ -52,7 +52,7 @@ int main() {
   }
 
   int lane = 1; // middle lane
-  double ref_vel = 49.5;  // miles per hr
+  double ref_vel = 0.0;  // miles per hr
 
   h.onMessage([&map_waypoints_x,&map_waypoints_y,&map_waypoints_s,
                &map_waypoints_dx,&map_waypoints_dy,&lane,&ref_vel]
@@ -118,10 +118,15 @@ int main() {
               }
             }
           }
+
+          // 22.4 miles per hr ~= 10 mts per sec square
+          // 20ms frame is 1/50th of sec
+          // 22.4/50 = 0.44 mts per sec square
+          // 0.224 miles per hr ~= 5 mts per sec square (less than required max)
           if(reduce_speed)
-            ref_vel = 29.5;
+            ref_vel -= 0.224; 
           else
-            ref_vel = 49.5;
+            ref_vel += 0.224;
 
           // define some reference states
           double ref_x = car_x;
