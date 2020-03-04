@@ -94,11 +94,34 @@ int main() {
 
           json msgJson;
 
+
           // the points we are building with previous values too
           vector<double> x_pts;
           vector<double> y_pts;
 
           int prev_size = previous_path_x.size();
+          bool reduce_speed = false;
+
+          /* first lets avoid collision with the car in the front */
+          // if we have any points left over
+          if(prev_size > 0)
+
+
+          for(int i=0; i< sensor_fusion.size(); i++)
+          {
+            // check for the cars present in our lane
+            if((sensor_fusion[i][6] > (2+4*lane)-2) && (sensor_fusion[i][6] < (2+4*lane)+2))
+            {
+              // if its s value is less than 30 ahead of us, reduce speed
+              if(sensor_fusion[i][5] < (30 + car_s) && (sensor_fusion[i][5] > car_s)){
+                reduce_speed = true;
+              }
+            }
+          }
+          if(reduce_speed)
+            ref_vel = 29.5;
+          else
+            ref_vel = 49.5;
 
           // define some reference states
           double ref_x = car_x;

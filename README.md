@@ -6,15 +6,18 @@ Self-Driving Car Engineer Nanodegree Program
  - Changed the eigen calls in main.cpp to reflect the headers in local usr/lib insted of the folders in src
  - Deleted the eigen folder from src
  - Compiles and runs successfully. Car doesnt move yet.
-
+--
  - Made the initial changes according to the project QandA
  - Car moved in straight line with the generated coordinates
-
+--
  - Included the spline.h header only package. This can generate polynomial for line fit
  - Created waypoints at 30,60 and 90 ahead and fit next 50 points
  - Resued whatever points were left over from previous case
  - Car now runs smoothly in the same lane. Jerk still present since 0-49.5 in one instant
-
+--
+ - Taking into account sensor fusion data. Looping through all the car objects a checking which ones are in our lane
+ - For the ones in our lane, check the s value if it is in front and less than 30 mts ahead and reduce speed
+ - If there is no car, increase the speed back to highest. Keep checking this every loop
 
 Everything below this line are the original instructions for the project. 
 -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -69,7 +72,14 @@ the path has processed since last time.
 
 #### Sensor Fusion Data, a list of all other car's attributes on the same side of the road. (No Noise)
 
-["sensor_fusion"] A 2d vector of cars and then that car's [car's unique ID, car's x position in map coordinates, car's y position in map coordinates, car's x velocity in m/s, car's y velocity in m/s, car's s position in frenet coordinates, car's d position in frenet coordinates. 
+["sensor_fusion"] A 2d vector of cars and then that car's [
+  0 - car's unique ID, 
+  1 - car's x position in map coordinates, 
+  2 - car's y position in map coordinates, 
+  3 - car's x velocity in m/s, 
+  4 - car's y velocity in m/s, 
+  5- car's s position in frenet coordinates, 
+  6- car's d position in frenet coordinates] 
 
 ## Details
 
