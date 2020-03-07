@@ -122,7 +122,7 @@ int main() {
             if((sensor_fusion[i][6] > (2+4*lane)-2) && (sensor_fusion[i][6] < (2+4*lane)+2))
             {
               // if its s value is less than 30 ahead of us, reduce speed
-              if(sensor_fusion[i][5] < (30 + car_s) && (sensor_fusion[i][5] > car_s)){
+              if(sensor_fusion[i][5] < (30 + end_path_s) && (sensor_fusion[i][5] > car_s)){
                 reduce_speed = true;
               }
             }

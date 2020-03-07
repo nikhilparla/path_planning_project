@@ -2,32 +2,40 @@
 Self-Driving Car Engineer Nanodegree Program
 
 ### Progress
-Initial commit
+#####Initial commit
  - Installed the uWs library and header files in the local machine
  - Changed the eigen calls in main.cpp to reflect the headers in local usr/lib insted of the folders in src
  - Deleted the eigen folder from src
  - Compiles and runs successfully. Car doesnt move yet.
 
-Stays in the lane and drives
+#####Stays in the lane and drives
  - Made the initial changes according to the project QandA  
  - Car moved in straight line with the generated coordinates
 
-ego car runs smoothly in its lane
+#####ego car runs smoothly in its lane
  - Included the spline.h header only package. This can generate polynomial for line fit  
  - Created waypoints at 30,60 and 90 ahead and fit next 50 points
  - Resued whatever points were left over from previous case
  - Car now runs smoothly in the same lane. Jerk still present since 0-49.5 in one instant
 
-gradual change of speed
+#####gradual change of speed
  - Taking into account sensor fusion data. Looping through all the car objects a checking which ones are in our lane  
  - For the ones in our lane, check the s value if it is in front and less than 30 mts ahead and reduce speed
  - If there is no car, increase the speed back to highest. Keep checking this every loop
 
-lane change logic added. few collisions
+#####lane change logic added. few collisions
  - if you are reducing speed, check the lane traffic on left and right lane of ego lane
  - check corner cases for lanes 0 and 2
  - If there are no cars for 30mts in front and 10 int he back, good to change lanes
  - colliding with cars right next to it in some cases. Assume it is because of the prev end value of s
+
+#####collisions reduced
+ - changed logic to reflect the previous end s value
+ - collisions reduced drastically and car changes lanes smoothly
+ - Max distance without collisions 1.43 miles
+
+#####no collisions. finished track
+ - One change in the reduce speed calculation to check from prev end s to curr s value made car go safer
 
 
 Everything below this line are the original instructions for the project. 
