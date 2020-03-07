@@ -101,11 +101,14 @@ int main() {
 
           int prev_size = previous_path_x.size();
           bool reduce_speed = false;
+          bool change_lane = false;
+          bool left_lane_free = false;
+          bool right_lane_free = false;
 
           /* first lets avoid collision with the car in the front */
           // if we have any points left over
           if(prev_size > 0)
-
+            car_s = end_path_s;
 
           for(int i=0; i< sensor_fusion.size(); i++)
           {
@@ -123,10 +126,85 @@ int main() {
           // 20ms frame is 1/50th of sec
           // 22.4/50 = 0.44 mts per sec square
           // 0.224 miles per hr ~= 5 mts per sec square (less than required max)
-          if(reduce_speed)
-            ref_vel -= 0.224; 
-          else
+          if (reduce_speed)
+            ref_vel -= 0.224;
+          else if (ref_vel < 49.5)
             ref_vel += 0.224;
+
+          int  ref_lane = lane;
+
+          // If reduced speed, check cars in other lanes
+          if (reduce_speed)
+          {
+            // check for the cars present left lane
+            if ((lane - 1) > -1)
+            {
+              lane--;
+
+              // check if you can change the lane
+              for (int i = 0; i < sensor_fusion.size(); i++)
+              {
+
+                if ((sensor_fusion[i][6] > (2 + 4 * lane) - 2) && (sensor_fusion[i][6] < (2 + 4 * lane) + 2))
+                {
+                  if (sensor_fusion[i][5] < (30 + car_s) && (sensor_fusion[i][5] > car_s))
+                  {
+                    left_lane_free = false;
+                    break;
+                  }
+                }
+                // if i finishes without breaking
+                    std::cout << "left lane i value  "<< i << std::endl;
+                if(i == sensor_fusion.size())
+                  {
+                    left_lane_free = true;
+                    std::cout << "left lane free "<< std::endl;
+                  }
+              } // end for
+            } // end if
+
+            lane = ref_lane;
+
+            // check for the cars present right lane
+            if ((lane + 1) < 3 && !left_lane_free)
+            {
+              lane++;
+
+              // check if you can change the lane
+              for (int i = 0; i < sensor_fusion.size(); i++)
+              {
+
+                if ((sensor_fusion[i][6] > (2 + 4 * lane) - 2) && (sensor_fusion[i][6] < (2 + 4 * lane) + 2))
+                {
+                  if (sensor_fusion[i][5] < (30 + car_s) && (sensor_fusion[i][5] > car_s))
+                  {
+                    right_lane_free = false;
+                    break;
+                  }
+                }
+                // if i finishes without breaking
+                if (i == sensor_fusion.size())
+                {
+                  right_lane_free = true;
+                  std::cout << "left lane free " << std::endl;
+                }
+              } // end for
+            }   // end if
+          }
+
+          // prefer left lane if free
+          if (left_lane_free)
+          {
+            lane = ref_lane - 1;
+          }
+          else if (right_lane_free)
+          {
+            lane = ref_lane + 1;
+          }
+          else
+          {
+            lane = ref_lane;
+          }
 
           // define some reference states
           double ref_x = car_x;
