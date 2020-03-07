@@ -105,11 +105,17 @@ int main() {
           bool left_lane_free = false;
           bool right_lane_free = false;
 
+          // end_path_s first time is 0, so car doesnt move. Work around
+          if(ref_vel < 1.0)
+            end_path_s = car_s;
+#if 0
           /* first lets avoid collision with the car in the front */
           // if we have any points left over
-          if(prev_size > 0)
+          std::cout << "car_s value = " << car_s << std::endl;
+          std::cout << "end_path_s value = " << end_path_s << std::endl;
+          if (prev_size > 0)
             car_s = end_path_s;
-
+#endif
           for(int i=0; i< sensor_fusion.size(); i++)
           {
             // check for the cars present in our lane
@@ -147,15 +153,14 @@ int main() {
 
                 if ((sensor_fusion[i][6] > (2 + 4 * lane) - 2) && (sensor_fusion[i][6] < (2 + 4 * lane) + 2))
                 {
-                  if (sensor_fusion[i][5] < (30 + car_s) && (sensor_fusion[i][5] > car_s))
+                  if (sensor_fusion[i][5] < (30 + car_s) && (sensor_fusion[i][5] > (car_s -10)))
                   {
                     left_lane_free = false;
                     break;
                   }
                 }
                 // if i finishes without breaking
-                    std::cout << "left lane i value  "<< i << std::endl;
-                if(i == sensor_fusion.size())
+                if(i == sensor_fusion.size()-1)
                   {
                     left_lane_free = true;
                     std::cout << "left lane free "<< std::endl;
@@ -176,17 +181,17 @@ int main() {
 
                 if ((sensor_fusion[i][6] > (2 + 4 * lane) - 2) && (sensor_fusion[i][6] < (2 + 4 * lane) + 2))
                 {
-                  if (sensor_fusion[i][5] < (30 + car_s) && (sensor_fusion[i][5] > car_s))
+                  if (sensor_fusion[i][5] < (30 + car_s) && (sensor_fusion[i][5] > (car_s -10)))
                   {
                     right_lane_free = false;
                     break;
                   }
                 }
                 // if i finishes without breaking
-                if (i == sensor_fusion.size())
+                if (i == sensor_fusion.size()-1)
                 {
                   right_lane_free = true;
-                  std::cout << "left lane free " << std::endl;
+                  std::cout << "right lane free " << std::endl;
                 }
               } // end for
             }   // end if
@@ -242,9 +247,9 @@ int main() {
             y_pts.push_back(ref_y);
           }
 
-          vector<double> next_wp0 = getXY(car_s + 30,(2+4*lane), map_waypoints_s, map_waypoints_x, map_waypoints_y);
-          vector<double> next_wp1 = getXY(car_s + 60,(2+4*lane), map_waypoints_s, map_waypoints_x, map_waypoints_y);
-          vector<double> next_wp2 = getXY(car_s + 90,(2+4*lane), map_waypoints_s, map_waypoints_x, map_waypoints_y);
+          vector<double> next_wp0 = getXY(end_path_s + 30,(2+4*lane), map_waypoints_s, map_waypoints_x, map_waypoints_y);
+          vector<double> next_wp1 = getXY(end_path_s + 60,(2+4*lane), map_waypoints_s, map_waypoints_x, map_waypoints_y);
+          vector<double> next_wp2 = getXY(end_path_s + 90,(2+4*lane), map_waypoints_s, map_waypoints_x, map_waypoints_y);
 
           x_pts.push_back(next_wp0[0]);
           x_pts.push_back(next_wp1[0]);
