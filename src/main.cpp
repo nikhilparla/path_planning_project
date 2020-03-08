@@ -127,28 +127,8 @@ int main() {
           // 0.224 miles per hr ~= 5 mts per sec square (less than required max)
           if (reduce_speed)
             ref_vel -= 0.224;
-          else if (ref_vel < 120)
-            // else if (ref_vel < 49.5)
+          else if (ref_vel < 49.5)
             ref_vel += 0.4;
-
-          // TODO:remove
-          // until 4 mile mark max speed very high
-          // after that start printing values
-          if (car_s > 6437.38)
-          {
-            ref_vel = 40.0;
-            std::cout << "car_x = " << car_x << std::endl;
-            std::cout << "car_y = " << car_y << std::endl;
-            std::cout << "car_s = " << car_s << std::endl;
-            std::cout << "car_d = " << car_d << std::endl;
-            std::cout << "car_yaw = " << car_yaw << std::endl;
-            std::cout << "car_speed = " << car_speed << std::endl;
-            std::cout << " ------------------ " << std::endl;
-            std::cout << std::endl;
-          }
-          else
-          {
-          }
 
           int  ref_lane = lane;
 
@@ -166,7 +146,8 @@ int main() {
 
                 if ((sensor_fusion[i][6] > (2 + 4 * lane) - 2) && (sensor_fusion[i][6] < (2 + 4 * lane) + 2))
                 {
-                  if (sensor_fusion[i][5] < (30 + car_s) && (sensor_fusion[i][5] > (car_s -10)))
+                  // check car 25 mts out front and 5 mts behind
+                  if (sensor_fusion[i][5] < (25 + car_s) && (sensor_fusion[i][5] > (car_s -5)))
                   {
                     left_lane_free = false;
                     break;
@@ -194,7 +175,8 @@ int main() {
 
                 if ((sensor_fusion[i][6] > (2 + 4 * lane) - 2) && (sensor_fusion[i][6] < (2 + 4 * lane) + 2))
                 {
-                  if (sensor_fusion[i][5] < (30 + car_s) && (sensor_fusion[i][5] > (car_s -10)))
+                  // check car 25 mts out front and 5 mts behind
+                  if (sensor_fusion[i][5] < (25 + car_s) && (sensor_fusion[i][5] > (car_s -5)))
                   {
                     right_lane_free = false;
                     break;
@@ -260,9 +242,9 @@ int main() {
             y_pts.push_back(ref_y);
           }
 
-          vector<double> next_wp0 = getXY(end_path_s + 20, (2 + 4 * lane), map_waypoints_s, map_waypoints_x, map_waypoints_y);
-          vector<double> next_wp1 = getXY(end_path_s + 30, (2 + 4 * lane), map_waypoints_s, map_waypoints_x, map_waypoints_y);
-          vector<double> next_wp2 = getXY(end_path_s + 40, (2 + 4 * lane), map_waypoints_s, map_waypoints_x, map_waypoints_y);
+          vector<double> next_wp0 = getXY(end_path_s + 30, (2 + 4 * lane), map_waypoints_s, map_waypoints_x, map_waypoints_y);
+          vector<double> next_wp1 = getXY(end_path_s + 60, (2 + 4 * lane), map_waypoints_s, map_waypoints_x, map_waypoints_y);
+          vector<double> next_wp2 = getXY(end_path_s + 90, (2 + 4 * lane), map_waypoints_s, map_waypoints_x, map_waypoints_y);
 
           x_pts.push_back(next_wp0[0]);
           x_pts.push_back(next_wp1[0]);

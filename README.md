@@ -56,6 +56,10 @@ A brief explanation of the code -
    - higher the velocity, smaller the piece
  - Once we geenrated the full 50 points for the car to follow, we transformed then back to map frame and sent to the simulator
 
+ #### Video submission for reference
+  - https://www.youtube.com/watch?v=O2QbCO9m1es
+  - https://www.youtube.com/watch?v=z8zTL4YvJqs
+
 Everything below this line are the original instructions for the project. 
 -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 ### Simulator.
