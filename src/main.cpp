@@ -25,7 +25,7 @@ int main() {
   vector<double> map_waypoints_dy;
 
   // Waypoint map to read from
-  string map_file_ = "../data/highway_map.csv";
+  string map_file_ = "highway_map.csv";
   // The max s value before wrapping around the track back to 0
   double max_s = 6945.554;
 
@@ -108,14 +108,7 @@ int main() {
           // end_path_s first time is 0, so car doesnt move. Work around
           if(ref_vel < 1.0)
             end_path_s = car_s;
-#if 0
-          /* first lets avoid collision with the car in the front */
-          // if we have any points left over
-          std::cout << "car_s value = " << car_s << std::endl;
-          std::cout << "end_path_s value = " << end_path_s << std::endl;
-          if (prev_size > 0)
-            car_s = end_path_s;
-#endif
+          
           for(int i=0; i< sensor_fusion.size(); i++)
           {
             // check for the cars present in our lane
@@ -134,8 +127,28 @@ int main() {
           // 0.224 miles per hr ~= 5 mts per sec square (less than required max)
           if (reduce_speed)
             ref_vel -= 0.224;
-          else if (ref_vel < 49.5)
-            ref_vel += 0.224;
+          else if (ref_vel < 120)
+            // else if (ref_vel < 49.5)
+            ref_vel += 0.4;
+
+          // TODO:remove
+          // until 4 mile mark max speed very high
+          // after that start printing values
+          if (car_s > 6437.38)
+          {
+            ref_vel = 40.0;
+            std::cout << "car_x = " << car_x << std::endl;
+            std::cout << "car_y = " << car_y << std::endl;
+            std::cout << "car_s = " << car_s << std::endl;
+            std::cout << "car_d = " << car_d << std::endl;
+            std::cout << "car_yaw = " << car_yaw << std::endl;
+            std::cout << "car_speed = " << car_speed << std::endl;
+            std::cout << " ------------------ " << std::endl;
+            std::cout << std::endl;
+          }
+          else
+          {
+          }
 
           int  ref_lane = lane;
 
@@ -219,7 +232,7 @@ int main() {
           // if the prev state is empty , use car as starting ref
           if(prev_size < 2)
           {
-            // curr is car_x. Get the prev state
+            // use two points that make a path tangent to the car
             double car_x_prev = car_x - cos(car_yaw);
             double car_y_prev = car_y - sin(car_yaw);
 
@@ -247,9 +260,9 @@ int main() {
             y_pts.push_back(ref_y);
           }
 
-          vector<double> next_wp0 = getXY(end_path_s + 30,(2+4*lane), map_waypoints_s, map_waypoints_x, map_waypoints_y);
-          vector<double> next_wp1 = getXY(end_path_s + 60,(2+4*lane), map_waypoints_s, map_waypoints_x, map_waypoints_y);
-          vector<double> next_wp2 = getXY(end_path_s + 90,(2+4*lane), map_waypoints_s, map_waypoints_x, map_waypoints_y);
+          vector<double> next_wp0 = getXY(end_path_s + 20, (2 + 4 * lane), map_waypoints_s, map_waypoints_x, map_waypoints_y);
+          vector<double> next_wp1 = getXY(end_path_s + 30, (2 + 4 * lane), map_waypoints_s, map_waypoints_x, map_waypoints_y);
+          vector<double> next_wp2 = getXY(end_path_s + 40, (2 + 4 * lane), map_waypoints_s, map_waypoints_x, map_waypoints_y);
 
           x_pts.push_back(next_wp0[0]);
           x_pts.push_back(next_wp1[0]);
@@ -280,7 +293,7 @@ int main() {
           vector<double> next_x_vals;
           vector<double> next_y_vals;
 
-          // start with all the points in the previous path
+         // start with all the points in the previous path
           for(int i=0; i< previous_path_x.size(); i++)
           {
             next_x_vals.push_back(previous_path_x[i]);
@@ -319,6 +332,7 @@ int main() {
             next_x_vals.push_back(x_pt);
             next_y_vals.push_back(y_pt);
           }
+
 
           msgJson["next_x"] = next_x_vals;
           msgJson["next_y"] = next_y_vals;
