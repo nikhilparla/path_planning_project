@@ -49,7 +49,7 @@ A brief explanation of the code -
  - With the polynomial for the path calculated, we need to get few waypoints for the ego car to follow
  - First get the points that were leftover from the prevoius state so that it helps in our transition
  - A total of 50 points need to be generated and for the rest of the points needed after adding the ones from the previous path, we have to space them evenly so that the car doesnt exeed the speed limit
- - To get the points on the calculated spline, we used a target distance of 30mts out front and the calculated the xy coods of those in car's frame
+ - To get the points on the calculated spline, we used a target distance of 30mts out front and the calculated the xy coods of those in car's frame ![img](./images/code.png)
    - The car visits a points every 20ms
    - N pieces times 0.02s times velocity = distance to travel
    - With this we get the number of pieces needed to generate and get the trajectory
